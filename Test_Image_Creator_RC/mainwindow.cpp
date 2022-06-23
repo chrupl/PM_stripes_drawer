@@ -204,17 +204,45 @@ void MainWindow::CreateImages()
     {
         a = tan((angle*m_PI)/180);
         b = sqrt(1+pow(a,2));
-
-        for(int y = -maxYh; y < maxYh; y++)
+        double delta;
+       /* for(int y = -maxYh; y < maxYh; y++)
           {
-              for(int x = -maxXh; x <  maxXh; x++ )
+           for(int x = -maxXh; x <  maxXh; x++ )
               {
-                for(double i = -maxY; i<maxY;i+=draw_line_every)
+               delta = pow(-2*x+2*a*b-2*a*y,2) - 4* (1+pow(a,2)*(-2*b+pow(y,2)+pow(x,2)-0.5));
+               //wzor koła P == (pow(R,2)/2)*(fi - sin(fi));
+              for(double i = -maxY; i<maxY;i+=draw_line_every)
                 {
                     if(y > a*x+b*(i-width_of_stripe) && y < a*x+b*(i+width_of_stripe))
                     {
-                        *wImIn = 255;
+                       if(delta<=0)  *wImIn = 255;
+                       else
+                       {
+
+                       }
                     }
+
+
+                 }
+                wImIn++;
+             }
+
+          }
+       */ for(int y = -maxYh; y < maxYh; y++)
+          {
+              for(int x = -maxXh; x <  maxXh; x++ )
+              {
+               //delta = pow(-2*x+2*a*b-2*a*y,2) - 4*(1+pow(a,2)*(pow(x,2)+pow(b,2)+2*y*b+pow(y,2) - 0.5));
+              //wzor koła P == (pow(R,2)/2)*(fi - sin(fi));
+                for(double i = -maxY; i<maxY;i+=draw_line_every)
+                {
+                    delta = pow(-2*x+2*a*b*i-2*a*y,2) - 4*(1+pow(a,2)*(pow(x,2)+pow(b*i,2)+2*y*b*i+pow(y,2) - 0.5));
+                    if(y > a*x+b*(i-width_of_stripe) && y < a*x+b*(i+width_of_stripe))
+                    {
+
+                        //*wImIn = 255;
+                        if(delta<0) *wImIn = 255;
+                    }             
                  }
                   wImIn++;
              }
