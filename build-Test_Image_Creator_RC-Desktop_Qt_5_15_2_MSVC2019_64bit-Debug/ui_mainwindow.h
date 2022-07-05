@@ -189,7 +189,7 @@ public:
         spinBox_draw_every_line->setMinimum(2);
         spinBox_draw_every_line->setMaximum(1000);
         spinBox_draw_every_line->setSingleStep(1);
-        spinBox_draw_every_line->setValue(5);
+        spinBox_draw_every_line->setValue(50);
         spinBox_draw_every_line->setDisplayIntegerBase(10);
         label_5 = new QLabel(frameMode);
         label_5->setObjectName(QString::fromUtf8("label_5"));

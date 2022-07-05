@@ -196,25 +196,98 @@ void MainWindow::CreateImages()
 
     double draw_line_every = ui->spinBox_draw_every_line->value();
     double width_of_stripe = ui->spinBox_width->value();
-    double a,b;
+    double a,b, plane_of_circle;
     ImIn = Mat::zeros(maxY,maxX,CV_8UC1);
     unsigned char *wImIn;
     wImIn = (unsigned char*)ImIn.data;
+    plane_of_circle = m_PI*pow(0.5,2);
     if(angle > -45 && angle < 45)
     {
         a = tan((angle*m_PI)/180);
         b = sqrt(1+pow(a,2));
-
-        for(int y = -maxYh; y < maxYh; y++)
+        double delta_lower,delta_upper,x1,x2,y1,y2,P12,P13,P23, angle_in_circle, plane_of_circle_cut, plane_of_circular_segment,brightness;
+       /* for(int y = -maxYh; y < maxYh; y++)
           {
-              for(int x = -maxXh; x <  maxXh; x++ )
+           for(int x = -maxXh; x <  maxXh; x++ )
               {
-                for(double i = -maxY; i<maxY;i+=draw_line_every)
+               delta = pow(-2*x+2*a*b-2*a*y,2) - 4* (1+pow(a,2)*(-2*b+pow(y,2)+pow(x,2)-0.5));
+               //wzor koła P == (pow(R,2)/2)*(fi - sin(fi));
+              for(double i = -maxY; i<maxY;i+=draw_line_every)
                 {
                     if(y > a*x+b*(i-width_of_stripe) && y < a*x+b*(i+width_of_stripe))
                     {
-                        *wImIn = 255;
+                       if(delta<=0)  *wImIn = 255;
+                       else
+                       {
+
+                       }
                     }
+
+
+                 }
+                wImIn++;
+             }
+
+          }
+       */ for(int y = -maxYh; y < maxYh; y++)
+          {
+              for(int x = -maxXh; x <  maxXh; x++ )
+              {
+               //delta = pow(-2*x+2*a*b-2*a*y,2) - 4*(1+pow(a,2)*(pow(x,2)+pow(b,2)+2*y*b+pow(y,2) - 0.5));
+              //wzor koła P == (pow(R,2)/2)*(fi - sin(fi));
+                for(double i = -maxY; i<maxY;i+=draw_line_every)
+                {
+                    delta_lower = pow(-2*x+2*a*b*(i-width_of_stripe)-2*a*y,2) - 4*(1+pow(a,2))*(pow(x,2)+pow(b*(i-width_of_stripe),2)-2*y*b*(i-width_of_stripe)+pow(y,2) - 0.5);
+                    delta_upper = pow(-2*x+2*a*b*(i+width_of_stripe)-2*a*y,2) - 4*(1+pow(a,2))*(pow(x,2)+pow(b*(i+width_of_stripe),2)-2*y*b*(i+width_of_stripe)+pow(y,2) - 0.5);
+                    if(y >= a*x+b*(i-width_of_stripe) && y <= a*x+b*(i+width_of_stripe))
+                    {
+                        if(delta_upper<0 && delta_lower<0) *wImIn = 255;
+
+                        if(delta_lower>=0)
+                        {
+                            x1 = (-(-2*x+2*a*b*(i-width_of_stripe)-2*a*y)+sqrt(delta_lower))/2*(1+pow(a,2));
+                            x2 = (-(-2*x+2*a*b*(i-width_of_stripe)-2*a*y)-sqrt(delta_lower))/2*(1+pow(a,2));
+                            y1 = a*x1+b*(i-width_of_stripe);
+                            y2 = a*x2+b*(i-width_of_stripe);
+
+                            P12 = sqrt(pow(x-x1,2)+pow(y-y1,2));
+                            P13 = sqrt(pow(x-x2,2)+pow(y-y2,2));
+                            P23 = sqrt(pow(x1-x2,2)+pow(y1-y2,2));
+
+                            angle_in_circle = acos((pow(P12,2)+pow(P13,2)-pow(P23,2))/(2*P12*P13))*(180/m_PI);
+
+                            plane_of_circular_segment = 0.25 * (angle_in_circle - sin(angle_in_circle));
+
+                            plane_of_circle_cut = plane_of_circle - plane_of_circular_segment;
+                            cout<<"deg:"<<angle_in_circle<<" "<<x1<<","<<y1<<" | "<<x2<<","<<y2<<" | "<<P12<<"#"<<P13<<"#"<<P23<<" | "<<plane_of_circular_segment<<" | "<<plane_of_circle<<" | "<<plane_of_circle_cut<<endl;
+                            brightness = (plane_of_circle_cut/plane_of_circle)*255;
+                            //cout<<brightness<<endl;
+                            *wImIn = brightness;
+                        }
+                        if(delta_upper>0)
+                        {
+                            /*
+                            x1 = (-(-2*x+2*a*b*(i-width_of_stripe)-2*a*y)+sqrt(delta_upper))/-2*(1+pow(a,2));
+                            x2 = (-(-2*x+2*a*b*(i-width_of_stripe)-2*a*y)-sqrt(delta_upper))/-2*(1+pow(a,2));
+                            y1 = a*x1+b*(i-width_of_stripe);
+                            y2 = a*x2+b*(i-width_of_stripe);
+
+                            P12 = sqrt(pow(x-x1,2)+pow(y-y1,2));
+                            P13 = sqrt(pow(x-x2,2)+pow(y-y2,2));
+                            P23 = sqrt(pow(x1-x2,2)+pow(y1-y2,2));
+
+                            angle_in_circle = acos((pow(P12,2)+pow(P13,2)-pow(P23,2))/(2*P12*P13))*(180/m_PI)*100000;
+
+                            plane_of_circular_segment = 0.25 * (angle_in_circle - sin(angle_in_circle));
+
+                            plane_of_circle_cut = plane_of_circle - plane_of_circular_segment;
+                            cout<<"deg:"<<angle_in_circle<<" "<<x1<<","<<y1<<" | "<<x2<<","<<y2<<" | "<<P12<<"#"<<P13<<"#"<<P23<<" | "<<plane_of_circular_segment<<" | "<<plane_of_circle<<" | "<<plane_of_circle_cut<<endl;
+                            brightness = (plane_of_circle_cut/plane_of_circle)*255;
+                            //cout<<brightness<<endl;
+                            *wImIn = brightness;*/
+                        }
+
+                    }             
                  }
                   wImIn++;
              }
